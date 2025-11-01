@@ -50,12 +50,12 @@ class BasePolicy():
         '''
         pass
         
-    def act(self, state, action_size, versbose=0):
+    def act(self, state, action_size, epsilon, versbose=0):
         '''
         根据状态选择动作
         示例采用 epsilon-greedy policy
         '''
-        if np.random.rand() <= self.epsilon:
+        if np.random.rand() <= epsilon:
             action = np.random.choice(action_size)
         else:
             # pass # remove pass and use 2 lines below
@@ -83,10 +83,9 @@ class BasePolicy():
         '''
         评估当前策略的表现
         '''
-        print(f"Episode {ep + 1}/{episode} | Ep. Total Reward: {total_reward}"
-        f" | Epsilon : {epsilon:.3f}")
-#        f" | Eval Rwd Mean: {eval_reward_mean:.2f}"
-#        f" | Eval Rwd Var: {eval_reward_var:.2f}")
+        eval_reward_mean, eval_reward_var = 0, 0
+        print(f"Episode {ep + 1}/{episode} | Ep. Total Reward: {total_reward}| Epsilon : {epsilon:.3f}| Eval Rwd Mean: {eval_reward_mean:.2f}| Eval Rwd Var: {eval_reward_var:.2f}")
+        return (eval_reward_mean, eval_reward_var)
     
     def log(self, eval_reward_mean, eval_reward_var, total_reward):
         self.eval_reward_mean_lst.append(eval_reward_mean)
