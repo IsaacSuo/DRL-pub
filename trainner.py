@@ -46,7 +46,7 @@ class Trainer():
             for _ in range(500):
                 action = policy.act(state, self.action_size, cfg.epsilon)
                 try:
-                    policy.step(
+                    state, action, total_reward, next_state, done = policy.step(
                         self.env, 
                         state, 
                         action, 
@@ -69,11 +69,10 @@ class Trainer():
 
             # Evaluation
             # [WriteCode]   
-            eval_reward_mean, eval_reward_var = policy.evaluate(ep, cfg.episode, total_reward, cfg.epsilon)
-
+            eval_reward_mean, eval_reward_var = policy.evaluate(max_timesteps=500)
 
             # Log
-            policy.log(eval_reward_mean, eval_reward_var, total_reward)
+            policy.log(total_reward, eval_reward_mean, eval_reward_var, ep, cfg.episode, cfg.epsilon)
 
             # Early Stopping Condition to avoid overfitting
             # If the evaluation reward reaches the specified threshold, stop training early.

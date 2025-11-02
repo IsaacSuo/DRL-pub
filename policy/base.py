@@ -1,8 +1,10 @@
 import tensorflow as tf
+import keras
 from keras.models import Sequential
 from keras.layers import Dense
 from config.train_cfg import TrainingConfig
 import numpy as np
+import gymnasium as gym
 from gymnasium import Env
 
 class DoneException(Exception):
@@ -37,12 +39,6 @@ class BasePolicy():
         '''
         return "BasePolicy"
     
-    def compile(self):
-        '''
-        配置优化器、损失函数和评估指标。
-        在子类函数中重写该方法时，子类应调用 super().compile() 以确保基础配置被正确设置。
-        '''
-    
     def prepare(self):
         '''
         在训练开始前进行的准备工作，例如初始化经验回放缓冲区等。
@@ -76,21 +72,46 @@ class BasePolicy():
         total_reward += reward
         if done: 
             raise DoneException()
-        return state, action, reward, next_state, done
+        return state, action, total_reward, next_state, done
 
-        
-    def evaluate(self, ep, episode, total_reward, epsilon):
+    def evaluate(self, model: keras.Model, max_timesteps=500):
         '''
         评估当前策略的表现
         '''
-        eval_reward_mean, eval_reward_var = 0, 0
-        print(f"Episode {ep + 1}/{episode} | Ep. Total Reward: {total_reward}| Epsilon : {epsilon:.3f}| Eval Rwd Mean: {eval_reward_mean:.2f}| Eval Rwd Var: {eval_reward_var:.2f}")
-        return (eval_reward_mean, eval_reward_var)
+        eval_env = gym.make("CartPole-v1")
+        state_size = eval_env.observation_space.shape[0] # Number of observations (CartPole)
+        action_size = eval_env.action_space.n            # Number of possible actions
+        eval_reward = []
+
+        for i in range (5):
+            round_reward = 0
+            state, _ = eval_env.reset()
+            state = np.reshape(state, [1, state_size])
+
+            for i in range(max_timesteps):
+                action = np.argmax(model.predict(state, verbose=0)[0])
+                next_state, reward, terminated, truncated, _ = eval_env.step(action)
+                next_state = np.reshape(next_state, [1, state_size])
+
+                round_reward += reward
+                state = next_state
+
+                if terminated or truncated:
+                    eval_reward.append(round_reward)
+                    break
+
+        eval_env.close()
+
+        eval_reward_mean = np.sum(eval_reward)/len(eval_reward)
+        eval_reward_var = np.var(eval_reward)
+        
+        return eval_reward_mean, eval_reward_var
     
-    def log(self, eval_reward_mean, eval_reward_var, total_reward):
+    def log(self, total_reward, eval_reward_mean, eval_reward_var, ep, episode, epsilon):
+        self.train_reward_lst.append(total_reward)
         self.eval_reward_mean_lst.append(eval_reward_mean)
         self.eval_reward_var_lst.append(eval_reward_var)
-        self.train_reward_lst.append(total_reward)
+        print(f"Episode {ep + 1}/{episode} | Ep. Total Reward: {total_reward}| Epsilon : {epsilon:.3f}| Eval Rwd Mean: {eval_reward_mean:.2f}| Eval Rwd Var: {eval_reward_var:.2f}")
         
     def early_stopping(self, ep, eval_reward_mean, threshold=500):
         '''
@@ -98,7 +119,7 @@ class BasePolicy():
         如果评估奖励均值达到指定阈值，则提前停止训练
         在每个子类策略中进行重写 以下为默认样例
         '''
-        if eval_reward_mean > 500: # [Modify this threshold as needed]
+        if eval_reward_mean > threshold: # [Modify this threshold as needed]
             print(f"Early stopping triggered at Episode {ep + 1}.")
             return True
         return False

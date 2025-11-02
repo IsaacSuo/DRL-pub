@@ -21,7 +21,7 @@ class DoubleDeepQNetworkTagetModel():
     
     def summary(self):
         return self.model.summary()
-
+    
     def predict(self, state, verbose=0):
         '''
         给定环境状态 输出 qvalues
@@ -33,7 +33,6 @@ class DoubleDeepQNetworkTagetModel():
         不应该实现 target_model 是 eval_model 的 periodic copy
         '''
         pass
-    
     
     def set_weights(self, weights):
         '''
@@ -56,15 +55,15 @@ class DoubleDeepQNetworkEvalModel():
         # Compile the model
         if cfg.is_compiled:
             self.compile(optimizer=cfg.optimizer,loss=cfg.loss, metrics=cfg.metrics)
-            
-    def summary(self):
-        return self.model.summary()
-           
+    
     def predict(self, state, verbose=0):
         '''
         给定环境状态 输出 qvalues
         '''
         return self.model.predict(state, verbose=verbose)
+    
+    def summary(self):
+        return self.model.summary()
     
     def compile(self, optimizer, loss, metrics):
         self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)

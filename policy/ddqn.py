@@ -16,7 +16,16 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
         super().__init__()
         self.target_model = target_model
         self.eval_model = eval_model
-        
+    
+    def predict(self, state, verbose=0):
+        '''
+        模型的预测模块，给定当前观察到的 agent 的状态 输出动作概率分布
+        params:
+            state: 当前观察到的 agent 的状态
+            verbose: 是否打印日志信息，默认为 0 不打印
+        '''
+        return self.eval_model.predict(state, verbose=verbose)
+    
     def prepare(self):
         self.init_buffer()
         
@@ -66,10 +75,10 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
         '''
         与环境交互一步 即执行一步训练，包括前向传播、计算损失、反向传播等。
         '''
-        state, action, reward, next_state, done = super().step(env, state, action, state_size, total_reward)
+        state, action, total_reward, next_state, done = super().step(env, state, action, state_size, total_reward)
         # store experience into replay buffer
         # [WriteCode]
-        self.store_experience(state, action, reward, next_state, done)
+        self.store_experience(state, action, total_reward, next_state, done)
         if len(self.replay_buffer) >= ba:
             train_counter += 1
             # Update policy with mini-batches if replay buffer contains enough samples
@@ -116,3 +125,7 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
             # Periodically update the target network
             if train_counter % target_update_freq == 0:
                 self.target_model.set_weights(self.eval_model.get_weights())
+        return state, action, total_reward, next_state, done
+    
+    def evaluate(self, max_timesteps=500):
+        return super().evaluate(self.eval_model, max_timesteps)
