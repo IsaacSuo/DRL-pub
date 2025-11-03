@@ -6,26 +6,25 @@ from keras.layers import Dense
 import numpy as np
 from collections import deque
 from gymnasium import Env
+import random
 
-from model.ddqn import DoubleDeepQNetworkTagetModel, DoubleDeepQNetworkEvalModel
+from model.ddqn import DoubleDeepQNetworkTagetModel, DoubleDeepQNetworkOnlineModel
 
 class DoubleDeepQNetworkPolicy(BasePolicy):
     def __init__(self, 
                  target_model: DoubleDeepQNetworkTagetModel,
-                 eval_model: DoubleDeepQNetworkEvalModel):
+                 online_model: DoubleDeepQNetworkOnlineModel):
         super().__init__()
         self.target_model = target_model
-        self.eval_model = eval_model
+        self.online_model = online_model
     
-    def predict(self, state, verbose=0):
+    def predict(self, state, verbose):
         '''
-        模型的预测模块，给定当前观察到的 agent 的状态 输出动作概率分布
-        params:
-            state: 当前观察到的 agent 的状态
-            verbose: 是否打印日志信息，默认为 0 不打印
+        重写基类 predict 方法， 指定用 online_model 预测
+        在 self.act 中使用
         '''
-        return self.eval_model.predict(state, verbose=verbose)
-    
+        self.online_model.predict(state, verbose)
+        
     def prepare(self):
         self.init_buffer()
         
@@ -45,88 +44,88 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
         '''
         在缓冲区中采样mini_batch的经验用于梯度更新
         '''
-        batch = np.random.choice(len(self.replay_buffer), batch_size, replace=False)
-        states = [self.replay_buffer[idx][0][0] for idx in batch]
-        actions = [self.replay_buffer[idx][1] for idx in batch]
-        rewards = [self.replay_buffer[idx][2] for idx in batch]
-        next_states = [self.replay_buffer[idx][3] for idx in batch]
-        dones = [self.replay_buffer[idx][4] for idx in batch]
-        self.replay_buffer.clear()
-        # states, actions, rewards, next_states, dones = zip(*[self.replay_buffer[idx] for idx in batch])
-        return (np.array(states), 
-                np.array(actions), 
-                np.array(rewards), 
-                np.array(next_states), 
-                np.array(dones))
-    
-    def step(self, 
-             env: Env, 
-             state, 
-             action, 
-             state_size, 
-             total_reward, 
-             train_counter, 
+        # Ensure we have enough samples
+        assert len(self.replay_buffer) >= batch_size, (
+            f"Not enough samples in buffer to sample {batch_size} items.")
+
+        # Sample a mini-batch
+        minibatch = random.sample(self.replay_buffer, batch_size)
+
+        states, actions, rewards, next_states, dones = zip(*minibatch)
+
+        states = np.array(states, dtype=np.float32).squeeze()
+        next_states = np.array(next_states, dtype=np.float32).squeeze()
+        actions = np.array(actions, dtype=np.int32)
+        rewards = np.array(rewards, dtype=np.float32)
+        dones = np.array(dones, dtype=np.float32)
+
+        return states, actions, rewards, next_states, dones
+        
+    def step(self,
+             env: Env,
+             state_size,
+             state,
+             action,
+             total_reward,
+             train_counter,
              cb,
-             ba,
              epsilon,
+             ba,
              gamma,
              epsilon_min,
              epsilon_decay,
-             target_update_freq):
+             target_update_freq,
+             epoch,
+             ):
         '''
         与环境交互一步 即执行一步训练，包括前向传播、计算损失、反向传播等。
         '''
-        state, action, total_reward, next_state, done = super().step(env, state, action, state_size, total_reward)
-        # store experience into replay buffer
-        # [WriteCode]
-        self.store_experience(state, action, total_reward, next_state, done)
+        next_state, reward, done = super().step(env, action, state_size)
+        self.store_experience(state, action, reward, next_state, done)
+        state = next_state
+        total_reward += reward
+        if done:
+            return state, total_reward, epsilon, done
+        
         if len(self.replay_buffer) >= ba:
             train_counter += 1
             # Update policy with mini-batches if replay buffer contains enough samples
             # Update policy using Double Deep Q-Learning update:
             # Q(s, a) = r + gamma * Q_target(S', argmax Q_eval(S', a))
             # [WriteCode]
-            
             states, actions, rewards, next_states, dones = self.sample_buffer(ba)
             
             # Compute target Q-values:
             # - If done, Q-target = reward (no future reward)
             # - Otherwise, Q-target = reward + gamma * Q_target(S', argmax Q_eval(S', a))
-            target_q_values = []
-            for s, a, r, s_, d in zip(states, actions, rewards, next_states, dones):
-                if d:
-                    target_q_values.append(r)
-                else:
-                    # Predict current Q-values for state using eval_model
-                    # Use eval_model to determine best action in next_state
-                    eval_y_values = self.eval_model.predict(s_, verbose=0)
-                    a_best = np.argmax(eval_y_values)
-                    # Use target_model to compute Q-value for that action
-                    target_q_value = self.target_model.predict(s_, verbose=0)[0][a_best]
-                    target_q_values.append(r + gamma * target_q_value)
-            target_q_values = np.array(target_q_values)
             
+            # Predict current Q-values for state using eval_model
+            online_q_values = self.online_model.predict(next_states, verbose=0)
+            # Use eval_model to determine best action in next_state
+            best_actions = np.argmax(online_q_values, axis=1)
+             # Use target_model to compute Q-value for that action
+            target_q_values = self.target_model.predict(next_states, verbose=0) 
+            q_targets = target_q_values[np.arange(len(best_actions)), best_actions] * gamma + rewards
             # Update only the Q-value for the taken action
-            current_q_values = self.eval_model.predict(states, verbose=1)
-            # print("Current Q-values before update:", current_q_values)
-            for i, a in enumerate(actions):
-                current_q_values[i][a] = target_q_values[i]
-            current_q_values = np.array(current_q_values)
-            # print("Current Q-values after update:", current_q_values)
+            q_targets = np.where(dones.astype(bool), rewards, q_targets)
             
             # Fit the model:
             # - Inputs: state
             # - Targets: updated Q-values (with action Q-value replaced by computed target)
-            self.eval_model.model.fit(states, current_q_values, batch_size=ba, verbose=1, callbacks=[cb])
+            y_values = self.online_model.predict(states, verbose=0)
+            y_values[np.arange(actions.shape[0]), actions] = q_targets
+            self.online_model.fit(X=states, Y=y_values, batch_size=ba, callbacks=cb, verbose=0, epoch=epoch)
             
+
             # Update exploration rate
             if epsilon > epsilon_min:
                 epsilon *= epsilon_decay
 
             # Periodically update the target network
             if train_counter % target_update_freq == 0:
-                self.target_model.set_weights(self.eval_model.get_weights())
-        return state, action, total_reward, next_state, done, epsilon
+                self.target_model.set_weights(self.online_model.get_weights())
+                
+        return state, total_reward, epsilon, done
     
     def evaluate(self, max_timesteps=500):
-        return super().evaluate(self.eval_model, max_timesteps)
+        return super().evaluate(self.online_model, max_timesteps)

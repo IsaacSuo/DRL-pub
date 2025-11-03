@@ -59,20 +59,15 @@ class BasePolicy():
             action = np.argmax(q_values)
         return action
         
-    def step(self, env: Env, state, action, state_size, total_reward):
+    def step(self, env: Env, action, state_size):
         '''
-        与环境交互一步 即执行一步训练，包括前向传播、计算损失、反向传播等。
-        在子类方法下重写该方法时，子类应调用 super().step() 以确保基础交互逻辑被正确执行。
+        正确更新 state, total_reward, epsilon
+        在子类方法中重写
         '''
         next_state, reward, terminated, truncated, _ = env.step(action)
         next_state = np.reshape(next_state, [1, state_size])
         done = terminated or truncated
-
-        state = next_state
-        total_reward += reward
-        if done: 
-            raise DoneException()
-        return state, action, total_reward, next_state, done
+        return next_state, reward, done
 
     def evaluate(self, model: keras.Model, max_timesteps=500):
         '''

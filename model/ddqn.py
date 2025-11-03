@@ -40,7 +40,7 @@ class DoubleDeepQNetworkTagetModel():
         '''
         self.model.set_weights(weights)
     
-class DoubleDeepQNetworkEvalModel():
+class DoubleDeepQNetworkOnlineModel():
     def __init__(self, cfg: DDQNConfig):
         self.input = Input(shape=(cfg.input_dim, ))
         self.model = Sequential()
@@ -73,3 +73,6 @@ class DoubleDeepQNetworkEvalModel():
         获取模型权重
         '''
         return self.model.get_weights()
+    
+    def fit(self, X, Y, batch_size=None, callbacks=None, verbose=1, epoch=1):
+        return self.model.fit(X, Y, batch_size=batch_size, callbacks=callbacks, verbose=verbose, epochs=epoch)
