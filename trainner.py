@@ -39,22 +39,24 @@ class Trainer():
             state, _ = self.env.reset()
             state = np.reshape(state, [1, self.state_size])
             total_reward = 0
+            epsilon = cfg.epsilon
 
             # record start time
             start = time.time()
 
             for _ in range(500):
-                action = policy.act(state, self.action_size, cfg.epsilon)
+                action = policy.act(state, self.action_size, epsilon)
                 try:
-                    state, action, total_reward, next_state, done = policy.step(
+                    state, action, total_reward, next_state, done, epsilon = policy.step(
                         self.env, 
                         state, 
                         action, 
                         self.state_size, 
                         total_reward, 
-                        train_counter, 
+                        train_counter,
+                        self.cb, 
                         cfg.ba,
-                        cfg.epsilon,
+                        epsilon,
                         cfg.gamma,
                         cfg.epsilon_min,
                         cfg.epsilon_decay,
@@ -72,7 +74,7 @@ class Trainer():
             eval_reward_mean, eval_reward_var = policy.evaluate(max_timesteps=500)
 
             # Log
-            policy.log(total_reward, eval_reward_mean, eval_reward_var, ep, cfg.episode, cfg.epsilon)
+            policy.log(total_reward, eval_reward_mean, eval_reward_var, ep, cfg.episode, epsilon)
 
             # Early Stopping Condition to avoid overfitting
             # If the evaluation reward reaches the specified threshold, stop training early.

@@ -113,7 +113,7 @@ class BasePolicy():
         self.eval_reward_var_lst.append(eval_reward_var)
         print(f"Episode {ep + 1}/{episode} | Ep. Total Reward: {total_reward}| Epsilon : {epsilon:.3f}| Eval Rwd Mean: {eval_reward_mean:.2f}| Eval Rwd Var: {eval_reward_var:.2f}")
         
-    def early_stopping(self, ep, eval_reward_mean, threshold=500):
+    def early_stopping(self, ep, eval_reward_mean, threshold=300):
         '''
         早停机制
         如果评估奖励均值达到指定阈值，则提前停止训练

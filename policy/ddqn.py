@@ -33,7 +33,7 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
         '''
         构建经验回放缓冲区‘
         '''
-        self.replay_buffer = deque(maxlen=10000)
+        self.replay_buffer = deque()
         
     def store_experience(self, state, action, reward, next_state, done):
         '''
@@ -66,6 +66,7 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
              state_size, 
              total_reward, 
              train_counter, 
+             cb,
              ba,
              epsilon,
              gamma,
@@ -116,7 +117,7 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
             # Fit the model:
             # - Inputs: state
             # - Targets: updated Q-values (with action Q-value replaced by computed target)
-            self.eval_model.model.fit(states, current_q_values, batch_size=ba, verbose=1)
+            self.eval_model.model.fit(states, current_q_values, batch_size=ba, verbose=1, callbacks=[cb])
             
             # Update exploration rate
             if epsilon > epsilon_min:
@@ -125,7 +126,7 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
             # Periodically update the target network
             if train_counter % target_update_freq == 0:
                 self.target_model.set_weights(self.eval_model.get_weights())
-        return state, action, total_reward, next_state, done
+        return state, action, total_reward, next_state, done, epsilon
     
     def evaluate(self, max_timesteps=500):
         return super().evaluate(self.eval_model, max_timesteps)
