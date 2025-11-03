@@ -1,11 +1,11 @@
 # Use the following set of NN hyperparameters for ALL FOUR baseline policies
-lr: 1e-4        #@param {type:"number"}               # learning rate
+lr: 1e-3        #@param {type:"number"}               # learning rate
 epoch: 2     #@param {type:"number"}               # epochs
-episode: 250  #@param {type:"number"}               # episodes
+episode: 500  #@param {type:"number"}               # episodes
 
 epsilon: 1           #@param {type:"number"}     # Starting exploration rate
 epsilon_min: 5e-2    #@param {type:"number"}     # Exploration rate min
-epsilon_decay: 0.995     #@param {type:"number"}     # Exploration rate decay
+epsilon_decay: 0.999     #@param {type:"number"}     # Exploration rate decay
 
 gamma: 0.99          #@param {type:"number"}     # Agent discount factor
 
@@ -13,4 +13,4 @@ gamma: 0.99          #@param {type:"number"}     # Agent discount factor
 ba: 32      #@param {type:"number"}               # batch_size
 
 # Use the following set of RL hyperparameters for DQN and DDQN policies
-target_update_freq: 10 # @param {type:"number"}    # Target network update frequency
+target_update_freq: 50 # @param {type:"number"}    # Target network update frequency
