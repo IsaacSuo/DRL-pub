@@ -47,7 +47,7 @@ class DoubleDeepQNetworkTagetModel():
 
         # Compile the model
         if cfg.is_compiled:
-            custom_optimizer = Adam(learning_rate=cfg.lr)
+            custom_optimizer = Adam(learning_rate=cfg.lr, clipnorm=cfg.clipnorm)
             self.model.compile(optimizer=custom_optimizer, loss=cfg.loss, metrics=cfg.metrics)
     
     def summary(self):
@@ -89,7 +89,7 @@ class DoubleDeepQNetworkOnlineModel():
 
         # Compile the model
         if cfg.is_compiled:
-            custom_optimizer = Adam(learning_rate=cfg.lr)
+            custom_optimizer = Adam(learning_rate=cfg.lr, clipnorm=cfg.clipnorm)
             self.model.compile(optimizer=custom_optimizer, loss=cfg.loss, metrics=cfg.metrics)
     
     def predict(self, state, verbose=0):

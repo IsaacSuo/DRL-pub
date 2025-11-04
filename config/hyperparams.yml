@@ -1,6 +1,6 @@
 # Use the following set of NN hyperparameters for ALL FOUR baseline policies
 lr: 1e-3        #@param {type:"number"}               # learning rate
-epoch: 2     #@param {type:"number"}               # epochs
+epoch: 1     #@param {type:"number"}               # epochs
 episode: 500  #@param {type:"number"}               # episodes
 
 epsilon: 1           #@param {type:"number"}     # Starting exploration rate

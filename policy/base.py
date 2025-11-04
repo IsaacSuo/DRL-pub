@@ -30,7 +30,6 @@ class BasePolicy():
             state: 当前观察到的 agent 的状态
             verbose: 是否打印日志信息，默认为 0 不打印
         '''
-        # Return model predictions so callers can use the q-values
         return self.model.predict(state, verbose=verbose)
     
     def __repr__(self):

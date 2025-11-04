@@ -23,7 +23,7 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
         重写基类 predict 方法， 指定用 online_model 预测
         在 self.act 中使用
         '''
-        self.online_model.predict(state, verbose)
+        return self.online_model.predict(state, verbose)
         
     def prepare(self):
         self.init_buffer()

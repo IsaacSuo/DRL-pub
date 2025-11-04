@@ -9,6 +9,7 @@ class DDQNConfig:
                  hidden_dims: list,
                  optimizer: str,
                  lr: str,
+                 clipnorm: float,
                  loss: Loss,
                  metrics:list):
         self.input_dim = input_dim
@@ -18,5 +19,6 @@ class DDQNConfig:
         self.hidden_dims = hidden_dims
         self.optimizer = optimizer
         self.lr = lr
+        self.clipnorm=clipnorm
         self.loss = loss
         self.metrics = metrics
