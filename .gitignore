@@ -209,4 +209,4 @@ __marimo__/
 .vscode/
 eec4400_logs/
 notebook/
-*ipynb
+*.ipynb
