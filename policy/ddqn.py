@@ -8,7 +8,7 @@ from collections import deque
 from gymnasium import Env
 import random
 
-from model.ddqn import DoubleDeepQNetworkTagetModel, DoubleDeepQNetworkOnlineModel
+from model.ddqn_mlp import DoubleDeepQNetworkTagetModel, DoubleDeepQNetworkOnlineModel
 
 class DoubleDeepQNetworkPolicy(BasePolicy):
     def __init__(self, 
