@@ -2,6 +2,7 @@ import tensorflow as tf
 import keras
 from keras.models import Sequential
 from keras.layers import Dense
+from keras.callbacks import TensorBoard
 from config.train_cfg import TrainingConfig
 import numpy as np
 import gymnasium as gym
@@ -22,7 +23,7 @@ class BasePolicy():
         self.train_reward_lst = []
         self.eval_reward_mean_lst = []
         self.eval_reward_var_lst = []
-        
+        self.summary_writer = None
     def predict(self, state, verbose=0):
         '''
         模型的预测模块，给定当前观察到的 agent 的状态 输出动作概率分布
@@ -39,12 +40,13 @@ class BasePolicy():
         '''
         return "BasePolicy"
     
-    def prepare(self):
+    def prepare(self, env: Env, cb: TensorBoard):
         '''
         在训练开始前进行的准备工作，例如初始化经验回放缓冲区等。
         在子类方法下重写该方法时，子类应调用 super().prepare() 以确保基础准备工作被正确执行。
         '''
-        pass
+        self.cb = cb
+        
         
     def act(self, state, action_size, epsilon, versbose=0):
         '''
@@ -107,7 +109,12 @@ class BasePolicy():
         self.eval_reward_mean_lst.append(eval_reward_mean)
         self.eval_reward_var_lst.append(eval_reward_var)
         print(f"Episode {ep + 1}/{episode} | Ep. Total Reward: {total_reward}| Epsilon : {epsilon:.3f}| Eval Rwd Mean: {eval_reward_mean:.2f}| Eval Rwd Var: {eval_reward_var:.2f}")
-        
+        if self.cb and self.cb.writer:
+            with self.cb.writer.as_default():
+                tf.summary.scalar('Training/Episode_Total_Reward', total_reward, step=ep)
+                tf.summary.scalar('Training/Epsilon', epsilon, step=ep)
+                tf.summary.scalar('Evaluation/Reward_Mean', eval_reward_mean, step=ep)
+                tf.summary.scalar('Evaluation/Reward_Variance', eval_reward_var, step=ep)
     def early_stopping(self, ep, eval_reward_mean, threshold=200):
         '''
         早停机制
