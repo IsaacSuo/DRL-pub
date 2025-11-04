@@ -25,7 +25,7 @@ class Trainer():
         默认中每个 baseline approach 都应该使用相同的 TrainingConfig
         '''
         # prepare all materials before training
-        policy.prepare()
+        policy.prepare(self.env)
         epsilon = cfg.epsilon
         train_counter = 0 # Train Counter for weight syncing
         total_training_time = 0 # For timing training

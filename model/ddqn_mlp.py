@@ -41,7 +41,7 @@ class DoubleDeepQNetworkTagetModel():
             else:
                 self.model.add(Dense(hd, use_bias=True))
 
-            self.model.add(BatchNormalization())
+            # self.model.add(BatchNormalization())
             self.model.add(Activation('relu'))
         self.model.add(Dense(cfg.output_dim, activation='linear'))
 
@@ -83,7 +83,7 @@ class DoubleDeepQNetworkOnlineModel():
             else:
                 self.model.add(Dense(hd, use_bias=True))
 
-            self.model.add(BatchNormalization())
+            # self.model.add(BatchNormalization())
             self.model.add(Activation('relu'))
         self.model.add(Dense(cfg.output_dim, activation='linear'))
 

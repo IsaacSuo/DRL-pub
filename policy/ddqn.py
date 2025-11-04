@@ -7,6 +7,8 @@ import numpy as np
 from collections import deque
 from gymnasium import Env
 import random
+import gymnasium as gym
+from gymnasium import Env
 
 from model.ddqn_mlp import DoubleDeepQNetworkTagetModel, DoubleDeepQNetworkOnlineModel
 
@@ -25,14 +27,31 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
         '''
         return self.online_model.predict(state, verbose)
         
-    def prepare(self):
-        self.init_buffer()
+    def prepare(self, env: Env):
+        self.init_buffer(env, 1000)
         
-    def init_buffer(self):
+    def init_buffer(self, env: Env, min_replay_size=1000):
         '''
         构建经验回放缓冲区‘
         '''
         self.replay_buffer = deque()
+        state_size = env.observation_space.shape[0]
+        
+        state, _ = env.reset()
+        state = np.reshape(state, [1, state_size])
+        while len(self.replay_buffer) < min_replay_size:
+            action = env.action_space.sample() 
+            next_state, reward, terminated, truncated, _ = env.step(action)
+            next_state = np.reshape(next_state, [1, state_size])
+            done = terminated or truncated
+            
+            self.store_experience(state, action, reward, next_state, done)
+            if done:
+                state, _ = env.reset()
+                state = np.reshape(state, [1, state_size])
+            else:
+                state = next_state
+        print(f"Warmup complete. Replay buffer size: {len(self.replay_buffer)}")
         
     def store_experience(self, state, action, reward, next_state, done):
         '''
