@@ -1,23 +1,54 @@
 import tensorflow as tf
-from keras.models import Sequential
-from keras.layers import Input, Dense, BatchNormalization
-from config.ddqn_cfg import DDQNConfig
+import keras
+from keras import Sequential
+from keras.layers import Input, Dense, BatchNormalization, Activation
+from keras.optimizers import (
+    Adadelta, 
+    Adam, 
+    Adamax, 
+    AdamW, 
+    Ftrl,
+    Lion,
+    Nadam,
+    RMSprop,
+    SGD,
+)
 import numpy as np
+
+from config.ddqn_cfg import DDQNConfig
+
+OPTIMIZER_DICT = {
+    'Adam': Adam,
+    'Adadelta': Adadelta, 
+    'Adam': Adam, 
+    'Adamax': Adamax, 
+    'AdamW': AdamW, 
+    'Ftrl': Ftrl,
+    'Lion': Lion,
+    'Nadam': Nadam,
+    'RMSprop': RMSprop,
+    'SGD': SGD,
+}
 class DoubleDeepQNetworkTagetModel():
     def __init__(self, cfg: DDQNConfig):
-        self.input = Input(shape=(cfg.input_dim, ))
-        self.model = Sequential()
+        self.model: keras.Model = Sequential()
         # [WriteCode]
-        input_dim = cfg.input_dim
+        is_first_layer = True
         for hd in cfg.hidden_dims:
-            self.model.add(Dense(hd, input_shape=(input_dim,), activation='relu', use_bias=True))
+            if is_first_layer:
+                self.model.add(Dense(hd, input_shape=(cfg.input_dim,), use_bias=True))
+                is_first_layer = False
+            else:
+                self.model.add(Dense(hd, use_bias=True))
+
             self.model.add(BatchNormalization())
-            input_dim = hd
-        self.model.add(Dense(cfg.output_dim, activation='sigmoid'))
+            self.model.add(Activation('relu'))
+        self.model.add(Dense(cfg.output_dim, activation='linear'))
 
         # Compile the model
         if cfg.is_compiled:
-            self.model.compile(optimizer=cfg.optimizer, loss=cfg.loss, metrics=cfg.metrics)
+            custom_optimizer = Adam(learning_rate=cfg.lr)
+            self.model.compile(optimizer=custom_optimizer, loss=cfg.loss, metrics=cfg.metrics)
     
     def summary(self):
         return self.model.summary()
@@ -42,19 +73,24 @@ class DoubleDeepQNetworkTagetModel():
     
 class DoubleDeepQNetworkOnlineModel():
     def __init__(self, cfg: DDQNConfig):
-        self.input = Input(shape=(cfg.input_dim, ))
-        self.model = Sequential()
+        self.model: keras.Model = Sequential()
         # [WriteCode]
-        input_dim = cfg.input_dim
+        is_first_layer = True
         for hd in cfg.hidden_dims:
-            self.model.add(Dense(hd, input_shape=(input_dim,), activation='relu', use_bias=True))
+            if is_first_layer:
+                self.model.add(Dense(hd, input_shape=(cfg.input_dim,), use_bias=True))
+                is_first_layer = False
+            else:
+                self.model.add(Dense(hd, use_bias=True))
+
             self.model.add(BatchNormalization())
-            input_dim = hd
-        self.model.add(Dense(cfg.output_dim, activation='sigmoid'))
+            self.model.add(Activation('relu'))
+        self.model.add(Dense(cfg.output_dim, activation='linear'))
 
         # Compile the model
         if cfg.is_compiled:
-            self.compile(optimizer=cfg.optimizer,loss=cfg.loss, metrics=cfg.metrics)
+            custom_optimizer = Adam(learning_rate=cfg.lr)
+            self.model.compile(optimizer=custom_optimizer, loss=cfg.loss, metrics=cfg.metrics)
     
     def predict(self, state, verbose=0):
         '''

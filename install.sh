@@ -1,4 +1,4 @@
-conda create -n tfdlenv python=3.10 -y
+conda create -n tfdlenv python=3.8 -y
 conda activate tfdlenv
 pip install tensorflow
 
@@ -9,5 +9,6 @@ pipx ensurepath
 pipx install copier
 copier --version
 pip install gymnasium
-
+pip install pyyaml
 pip install matplotlib
+pip install jupyter
