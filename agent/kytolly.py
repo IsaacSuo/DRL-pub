@@ -20,9 +20,9 @@ class KytollyAgent(CoreAgent):
         self.replay_buffer.append((state, action, reward, next_state, done))
     
     def prepare(self):
-        self.init_buffer(1000)
+        self.init_buffer(10000)
     
-    def init_buffer(self, min_replay_size=1000):
+    def init_buffer(self, min_replay_size=10000):
         '''构建经验回放缓冲区 初始存放 min_replay_size 的随机经验'''
         print('Inilize replay buffer, starting warmup...')
         state_size = self.env.observation_space.shape[0]
