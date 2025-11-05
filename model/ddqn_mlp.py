@@ -13,6 +13,18 @@ from keras.optimizers import (
     RMSprop,
     SGD,
 )
+from keras.losses import (
+    BinaryCrossentropy,
+    BinaryFocalCrossentropy,
+    CategoricalCrossentropy,
+    CategoricalFocalCrossentropy,
+    CategoricalHinge,
+    CosineSimilarity,
+    Hinge,
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_error,
+)
 import numpy as np
 
 from config.ddqn_cfg import DDQNConfig
@@ -29,13 +41,28 @@ OPTIMIZER_DICT = {
     'RMSprop': RMSprop,
     'SGD': SGD,
 }
+LOSSFUNCTION_DICT = {
+    'mse': mean_squared_error,
+    'mae': mean_absolute_error,
+    'mape': mean_absolute_percentage_error,
+    'bc': BinaryCrossentropy,
+    'bfc':BinaryFocalCrossentropy,
+    'cc':CategoricalCrossentropy,
+    'cfc':CategoricalFocalCrossentropy,
+    'ch':CategoricalHinge,
+    'cs':CosineSimilarity,
+    'h':Hinge,
+}
 class DoubleDeepQNetworkModel(keras.Model):
     def __init__(self, cfg: DDQNConfig):
         super().__init__()
         self.online_model: Sequential = Sequential()
         self.target_model: Sequential = Sequential()
         custom_optimizer = OPTIMIZER_DICT[cfg.optimizer](learning_rate=cfg.lr, clipnorm=cfg.clipnorm)
-        self.online_model.compile(optimizer=custom_optimizer, loss=cfg.loss, metrics=cfg.metrics)
+        custom_loss_function = LOSSFUNCTION_DICT[cfg.loss]
+        self.opt = custom_optimizer
+        self.loss_fn = custom_loss_function
+        self.online_model.compile(optimizer=custom_optimizer, loss=custom_loss_function, metrics=cfg.metrics)
         self._build(model=self.online_model, cfg=cfg)
         self._build(model=self.target_model, cfg=cfg)
         self.sync()

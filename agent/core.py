@@ -40,12 +40,12 @@ class CoreAgent():
         self.eval_reward_mean_lst.append(eval_reward_mean)
         self.eval_reward_var_lst.append(eval_reward_var)
         print(f"Episode {ep + 1}/{episode} | Ep. Total Reward: {total_reward}| Epsilon : {epsilon:.3f}| Eval Rwd Mean: {eval_reward_mean:.2f}| Eval Rwd Var: {eval_reward_var:.2f}")
-        if self.cb:
-            with tf.summary.create_file_writer(self.cb.log_dir).as_default():
-                tf.summary.scalar('Training/Episode_Total_Reward', total_reward, step=ep)
-                tf.summary.scalar('Training/Epsilon', epsilon, step=ep)
-                tf.summary.scalar('Evaluation/Reward_Mean', eval_reward_mean, step=ep)
-                tf.summary.scalar('Evaluation/Reward_Variance', eval_reward_var, step=ep)
+        # if self.cb:
+        #     with tf.summary.create_file_writer(self.cb.log_dir).as_default():
+        #         tf.summary.scalar('Training/Episode_Total_Reward', total_reward, step=ep)
+        #         tf.summary.scalar('Training/Epsilon', epsilon, step=ep)
+        #         tf.summary.scalar('Evaluation/Reward_Mean', eval_reward_mean, step=ep)
+        #         tf.summary.scalar('Evaluation/Reward_Variance', eval_reward_var, step=ep)
     
     def evaluate(self, max_timesteps):
         '''通过新建重置环境 评估当前策略的表现'''
@@ -142,8 +142,6 @@ class CoreAgent():
                 }
                 # unzip the updating results
                 state, total_reward, epsilon, train_counter= self.update_policy(experience, **update_dict)
-                if done:
-                    break
                 
             # record end time and log training time
             end = time.time()
