@@ -80,7 +80,9 @@ class KytollyAgent(CoreAgent):
         
         self.remember(state, action, reward, next_state, done)
         state, total_reward = next_state, total_reward + reward
-        if done and len(self.replay_buffer) >= ba:
+        if done:
+            return state, total_reward, epsilon, done
+        if len(self.replay_buffer) >= ba:
             train_counter += 1
             
             # Update policy with mini-batches if replay buffer contains enough samples
