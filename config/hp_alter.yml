@@ -14,4 +14,5 @@ ba: 64      #@param {type:"number"}               # batch_size
 
 # Use the following set of RL hyperparameters for DQN and DDQN policies
 target_update_freq: 250 # @param {type:"number"}    # Target network update frequency
-warmup: 33550304
+warmup_size: 33550 # 304
+score_uplimit: 500
