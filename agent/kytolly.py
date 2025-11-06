@@ -14,13 +14,14 @@ class KytollyAgent(CoreAgent):
     def __init__(self, env: Env, policy: BasePolicy, cfg: TrainingConfig, cb: TensorBoard):
         super().__init__(env, policy, cfg, cb)
         self.replay_buffer = deque()
+        self.warmup_size = cfg.warmup_size
         
     def remember(self, state, action, reward, next_state, done):
         '''存储单个经验到回放缓冲区'''
         self.replay_buffer.append((state, action, reward, next_state, done))
     
     def prepare(self):
-        self.init_buffer(10000)
+        self.init_buffer(self.warmup_size)
     
     def init_buffer(self, min_replay_size=10000):
         '''构建经验回放缓冲区 初始存放 min_replay_size 的随机经验'''
@@ -80,8 +81,8 @@ class KytollyAgent(CoreAgent):
         
         self.remember(state, action, reward, next_state, done)
         state, total_reward = next_state, total_reward + reward
-        if done:
-            return state, total_reward, epsilon, done
+        # if done:
+        #     return state, total_reward, epsilon, train_counter
         if len(self.replay_buffer) >= ba:
             train_counter += 1
             
@@ -105,4 +106,4 @@ class KytollyAgent(CoreAgent):
                 epsilon *= epsilon_decay
         
         # updating results follows
-        return state, total_reward, epsilon, done
+        return state, total_reward, epsilon, train_counter

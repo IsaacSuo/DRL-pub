@@ -3,7 +3,7 @@ from dataclasses import dataclass, fields
 import matplotlib.pyplot as plt
 
 @dataclass
-class DDQNConfig:
+class NetworkConfig:
     hidden_dims: list[int]
     metrics: list[str]
     input_dim: int = 4

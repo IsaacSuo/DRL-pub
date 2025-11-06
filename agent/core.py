@@ -5,7 +5,8 @@ import tensorflow as tf
 import keras
 import time 
 import matplotlib.pyplot as plt
-
+import json
+        
 from policy.base import BasePolicy
 from config.train import TrainingConfig
 from keras.callbacks import TensorBoard
@@ -81,10 +82,8 @@ class CoreAgent():
         return eval_reward_mean, eval_reward_var
     
     def early_stopping(self, ep, eval_reward_mean, threshold=500):
-        '''
-        早停机制 如果评估奖励均值达到指定阈值，则提前停止训练 以下为默认样例
-        '''
-        if eval_reward_mean > threshold: # [Modify this threshold as needed]
+        '''早停机制 如果评估奖励均值达到指定阈值，则提前停止训练 以下为默认样例'''
+        if eval_reward_mean >= threshold: # [Modify this threshold as needed]
             print(f"Early stopping triggered at Episode {ep + 1}.")
             return True
         return False
@@ -105,12 +104,11 @@ class CoreAgent():
         return self.policy.update(experience, **kwargs)
     
     def learn(self):
-        '''
-        默认中每个 baseline approach 都应该使用相同的 TrainingConfig
-        '''
+        '''默认中每个 baseline approach 都应该使用相同的 TrainingConfig'''
         # prepare all materials before training
         cfg = self.cfg
         self.prepare()
+        score_uplimit = cfg.score_uplimit
         epsilon = cfg.epsilon
         train_counter = 0 # Train Counter for weight syncing
         total_training_time = 0 # For timing training
@@ -123,7 +121,7 @@ class CoreAgent():
             total_reward = 0
             start = time.time() # record start time
 
-            for _ in range(500):
+            for _ in range(score_uplimit):
                 observation = (state, action_size, epsilon)
                 action = self.act(observation, deterministic=False, verbose=0)
                 next_state, reward, done = self.update(action)
@@ -142,6 +140,8 @@ class CoreAgent():
                 }
                 # unzip the updating results
                 state, total_reward, epsilon, train_counter= self.update_policy(experience, **update_dict)
+                if done: 
+                    break
                 
             # record end time and log training time
             end = time.time()
@@ -149,7 +149,7 @@ class CoreAgent():
 
             # Evaluation
             # [WriteCode]   
-            eval_reward_mean, eval_reward_var = self.evaluate(max_timesteps=500)
+            eval_reward_mean, eval_reward_var = self.evaluate(max_timesteps=score_uplimit)
 
             # Log
             self.collect(total_reward, epsilon, eval_reward_mean, eval_reward_var, ep, cfg.episode)
@@ -157,7 +157,7 @@ class CoreAgent():
             # Early Stopping Condition to avoid overfitting
             # If the evaluation reward reaches the specified threshold, stop training early.
             # The default threshold is set to 500, but you should adjust this based on observed training performance.
-            if self.early_stopping(ep, eval_reward_mean, threshold=500):
+            if self.early_stopping(ep, eval_reward_mean, threshold=score_uplimit):
                 break
 
         # record end time and calculate average training time per episode
@@ -165,11 +165,25 @@ class CoreAgent():
         print(f"Training time: {total_training_time/cfg.episode:.4f} seconds per episode")
         self.env.close()
         
-    def save_checkpoint(self, path):
+    def save(self, name):
         '''保存训练检查点'''
-        
-    def load_checkpoint(self, path):
+        self.policy.save(name)
+        obj = {
+            'train_reward_lst': self.train_reward_lst, 
+            'eval_reward_mean_lst': self.eval_reward_mean_lst, 
+            'eval_reward_var_lst': self.eval_reward_var_lst
+        }
+        with open(f'{name}/data.json', 'w', encoding='utf-8') as f:
+            json.dump(obj, f)
+        f.close()
+            
+    def load(self, name):
         '''加载训练检查点'''
+        policy = self.policy.load(name)
+        with open(f'{name}/data.json', 'r', encoding='utf-8') as f:
+            obj = json.load(f)
+        f.close()
+        return policy, obj['train_reward_lst'], obj['eval_reward_mean_lst'], obj['eval_reward_var_lst']
     
     def plot_smoothed_training_rwd(self, window_size=20):
         """Plot smoothed training rewards using a moving average."""
@@ -192,6 +206,7 @@ class CoreAgent():
         ax.legend()
         ax.grid(True)
         return fig, ax
+    
     def plot_eval_rwd_var(self):
         """Plot evaluation reward variance."""
         arr = np.asarray(self.eval_reward_var_lst, dtype=float)
