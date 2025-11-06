@@ -1,0 +1,94 @@
+\documentclass[10pt]{beamer}
+\usepackage[utf8]{inputenc}
+% \usepackage{xeCJK}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage{utopia} %font utopia imported
+\usetheme{CambridgeUS}
+\usecolortheme{dolphin}
+
+% set colors
+\definecolor{myNewColorA}{RGB}{255,102,0}
+\definecolor{myNewColorB}{RGB}{255,163,102}
+\definecolor{myNewColorC}{RGB}{255,224,204}
+\setbeamercolor*{palette primary}{bg=myNewColorC}
+\setbeamercolor*{palette secondary}{bg=myNewColorB, fg = white}
+\setbeamercolor*{palette tertiary}{bg=myNewColorA, fg = white}
+\setbeamercolor*{titlelike}{fg=myNewColorA}
+\setbeamercolor*{title}{bg=myNewColorA, fg = white}
+\setbeamercolor*{item}{fg=myNewColorA}
+\setbeamercolor*{caption name}{fg=myNewColorA}
+\usefonttheme{professionalfonts}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage{booktabs}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstdefinestyle{tree}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!5},
+  frame=single,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{gray}{$\hookrightarrow$}\space},
+}
+%------------------------------------------------------------
+\titlegraphic{\includegraphics[height=2cm]{figures/nus_logo_full-horizontal.jpg}}
+\setbeamerfont{title}{size=\LARGE}
+\setbeamerfont{subtitle}{size=\small}
+\setbeamerfont{author}{size=\small}
+\setbeamerfont{date}{size=\small}
+\setbeamerfont{institute}{size=\small}
+\title[National University of Singapore]{Group05: EEC4400 Assignment Report}
+\subtitle{}
+\author[XIE, Qingyun et al.]{
+  \texorpdfstring{SHI, Yichen$^1$}{}, 
+  \texorpdfstring{HE, Yunhan$^2$}{}, 
+  \texorpdfstring{LI, Jiachen$^3$}{}, 
+  \texorpdfstring{XIE, Qingyun$^4$}{}
+}
+\institute[qingyun.xie2025@nusricq311.cn]{National University of Singapore Research Institute(Chongqing)}
+\date[Presentation]{\today}
+
+%------------------------------------------------------------
+%This block of commands puts the table of contents at the 
+%beginning of each section and highlights the current section:
+%\AtBeginSection[]
+%{
+%  \begin{frame}
+%    \frametitle{Contents}
+%    \tableofcontents[currentsection]
+%  \end{frame}
+%}
+\AtBeginSection[]{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+%------------------------------------------------------------
+
+\begin{document}
+
+%The next statement creates the title page.
+\frame{\titlepage}
+% \begin{frame}
+% \frametitle{Contents}
+% \tableofcontents
+% \end{frame}
+%------------------------------------------------------------
+
+\input{sections/introduction}
+\input{sections/methods}
+\input{sections/conslusion}
+\input{sections/acknowledgement}
+
+\end{document}
+
+
+
