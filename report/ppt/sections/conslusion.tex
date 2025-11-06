@@ -1,10 +1,18 @@
 \section{Conclusion}
-    \begin{frame}{Conclusion}
-        \begin{enumerate}
-            \item The training process seems like not stable
-            \item try to not use fit, and replace it by GradientTape
-        \end{enumerate}
-    \end{frame}
+    \begin{frame}{Conclusion \& Discussion}
+
+\item QN and DQN show unstable training:
+\begin{itemize}
+    \item QN shows high instability — likely due to \textbf{lack of warmup and target network}, making training sensitive to correlated samples and overestimation bias.
+    \item DQN also underperforms — despite warmup and target network, the \textbf{fast $\varepsilon$-decay (0.997)} may cause premature exploitation before sufficient exploration.
+\end{itemize}
+  \item NQN and DDQN perform better:
+  \begin{itemize}
+    \item NQN: parameter noise provides \textbf{persistent exploration}, less dependent on $\varepsilon$-decay.
+    \item DDQN: reduces overestimation, yielding more stable Q-learning.
+\end{itemize}
+
+\end{frame}
 
     
 
