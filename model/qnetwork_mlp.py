@@ -1,11 +1,11 @@
 # model/q_network_mlp.py
 from keras.models import Sequential
 from keras.layers import Dense, ReLU
-from config.qnetwork_cfg import QNetworkConfig
+from config.network import NetworkConfig
 
 
 class QNetworkModel:
-    def __init__(self, config: QNetworkConfig):
+    def __init__(self, config: NetworkConfig):
         self.config = config
         self.model = self._build_model()
 
@@ -34,7 +34,6 @@ class QNetworkModel:
         # 使 model(state) 等价于 model.model(state)
         return self.model(*args, **kwargs)
 
-    # 可选：代理属性，方便访问
     @property
     def trainable_variables(self):
         return self.model.trainable_variables
