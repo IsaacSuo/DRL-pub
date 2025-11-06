@@ -2,6 +2,7 @@ import tensorflow as tf
 import keras
 from keras import Sequential
 from keras.layers import Input, Dense, BatchNormalization, Activation
+from keras.models import load_model
 from keras.optimizers import (
     Adadelta, 
     Adam, 
@@ -27,7 +28,7 @@ from keras.losses import (
 )
 import numpy as np
 
-from config.ddqn_cfg import DDQNConfig
+from config.network import NetworkConfig
 
 OPTIMIZER_DICT = {
     'Adam': Adam,
@@ -54,7 +55,7 @@ LOSSFUNCTION_DICT = {
     'h':Hinge,
 }
 class DoubleDeepQNetworkModel(keras.Model):
-    def __init__(self, cfg: DDQNConfig):
+    def __init__(self, cfg: NetworkConfig):
         super().__init__()
         self.online_model: Sequential = Sequential()
         self.target_model: Sequential = Sequential()
@@ -67,7 +68,7 @@ class DoubleDeepQNetworkModel(keras.Model):
         self._build(model=self.target_model, cfg=cfg)
         self.sync()
         
-    def _build(self, model: Sequential, cfg: DDQNConfig):
+    def _build(self, model: Sequential, cfg: NetworkConfig):
         is_first_layer = True
         for hd in cfg.hidden_dims:
             if is_first_layer:
@@ -79,6 +80,7 @@ class DoubleDeepQNetworkModel(keras.Model):
             # self.model.add(BatchNormalization())
             model.add(Activation('relu'))
         model.add(Dense(cfg.output_dim, activation='linear'))
+        
     def predict(self, state, verbose=0):
         '''给定环境状态 输出 qvalues'''
         return self.online_model.predict(state, verbose=0)
@@ -89,9 +91,16 @@ class DoubleDeepQNetworkModel(keras.Model):
     def sync(self):
         self.target_model.set_weights(self.online_model.get_weights())
         
-    def save(self, path):
+    def save(self, name):
         '''保存模型权重'''
+        self.online_model.save(f'{name}/online_sequential.h5')
+        self.target_model.save(f'{name}/target_sequential.h5')
         
-    def load(self, path):
+    def load(self, name):
         '''加载模型权重'''
+        online_model = load_model(f'{name}/online_sequential.h5')
+        target_model = load_model(f'{name}/target_sequential.h5')
+        return online_model
         
+    def plot(self):
+        pass

@@ -6,8 +6,7 @@ from typing import Any, Callable
 import os
 
 from config.train import TrainingConfig
-from config.ddqn_cfg import DDQNConfig
-from config.dqn_cfg import DQNConfig
+from config.network import NetworkConfig
 from policy.base import BasePolicy, DoneException
 from agent.core import CoreAgent
 from agent.kytolly import KytollyAgent
@@ -28,7 +27,7 @@ class Trainer():
     def train(self):
         '''默认中每个 baseline approach 都应该使用相同的 TrainingConfig'''
     def train_kytolly(self, train_cfg, env, cb):
-        online_ddqn_cfg = DDQNConfig(hidden_dims=[128, 128])
+        online_ddqn_cfg = NetworkConfig(hidden_dims=[128, 128], metrics=['mse'])
         ddqn_model = DoubleDeepQNetworkModel(online_ddqn_cfg)
         xqy_policy = DoubleDeepQNetworkPolicy(model=ddqn_model,device=self.device)
         xqy_agent = KytollyAgent(env, xqy_policy, train_cfg, cb)
@@ -46,7 +45,7 @@ class Trainer():
 
     def train_dqn(self, train_cfg, env, cb):
         '''使用标准DQN算法进行训练'''
-        dqn_cfg = DQNConfig(hidden_dims=[128, 128])
+        dqn_cfg = NetworkConfig(hidden_dims=[128, 128])
         dqn_model = DeepQNetworkModel(dqn_cfg)
         dqn_policy = DQNPolicy(model=dqn_model, device=self.device)
         dqn_agent = KytollyAgent(env, dqn_policy, train_cfg, cb)
