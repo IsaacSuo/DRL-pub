@@ -1,0 +1,54 @@
+\section{Methods}
+    \begin{frame}{Methods}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.4\textwidth]{figures/model.png}
+            \caption{the nueral network architechure}
+        \end{figure}
+
+    \end{frame}
+
+
+
+    \begin{frame}{Methods}
+        \begin{table}
+            \centering
+            \caption{Hyperparameters of the Model}
+            \begin{tabular}{ll}
+            \toprule
+            Parameter & Value \\
+            \midrule
+            lr & 0.0001 \\
+            epoch & 1 \\
+            episode & 500 \\
+            epsilon & 1.0 \\
+            epsilon\_min & 0.01 \\
+            epsilon\_decay & 0.997 \\
+            gamma & 0.99 \\
+            ba & 64 \\
+            target\_update\_freq & 250 \\
+            warmup\_size & 33550 \\
+            score\_uplimit & 500 \\
+            \bottomrule
+            \end{tabular}
+        \end{table}
+
+    \end{frame}
+
+    \begin{frame}{Methods}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.7\textwidth]{figures/reward_mean.png}
+            \caption{the raw and smoothed training reward}
+        \end{figure}
+
+    \end{frame}
+
+    \begin{frame}{Methods}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.7\textwidth]{figures/reward_var.png}
+            \caption{the variance of raw reward}
+        \end{figure}
+
+    \end{frame}
