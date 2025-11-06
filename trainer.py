@@ -4,6 +4,7 @@ import numpy as np
 import time 
 from typing import Any, Callable
 import os
+import tensorflow as tf
 
 from config.train import TrainingConfig
 from config.network import NetworkConfig
@@ -14,6 +15,9 @@ from policy.ddqn import DoubleDeepQNetworkPolicy
 from policy.dqn import DQNPolicy
 from model.ddqn_mlp import DoubleDeepQNetworkModel
 from model.dqn_mlp import DeepQNetworkModel
+from model.qnetwork_mlp import QNetworkModel
+from policy.qnetwork import QNetworkPolicy
+from agent.qnetwork import QNetworkAgent
 
 class Trainer():
     def __init__(self, device, log_dir,):
@@ -63,4 +67,23 @@ class Trainer():
         fig1.savefig('results/dqn/8/train_cfg.png')
         fig2.savefig('results/dqn/8/plot_smoothed_training_rwd.png')
         fig3.savefig('results/dqn/8/plot_eval_rwd_var.png')
-        
+
+    def train_q_learning(self, train_cfg, env, cb):
+
+        qnet_cfg = NetworkConfig(hidden_dims=[128, 128], metrics=['mse'])
+        qnet_model = QNetworkModel(qnet_cfg)
+        optimizer = tf.keras.optimizers.Adam(learning_rate=train_cfg.lr, clipnorm=qnet_cfg.clipnorm)
+        policy = QNetworkPolicy(model=qnet_model, optimizer=optimizer, device=self.device)
+        agent = QNetworkAgent(env, policy, train_cfg, cb)
+        agent.learn()
+
+        os.makedirs('results/q_learning/2', exist_ok=True)
+        fig0, _ = qnet_cfg.table()
+        fig1, _ = train_cfg.table()
+        fig2, _ = agent.plot_smoothed_training_rwd()
+        fig3, _ = agent.plot_eval_rwd_var()
+
+        fig0.savefig('results/q_learning/2/qnet_cfg.png')
+        fig1.savefig('results/q_learning/2/train_cfg.png')
+        fig2.savefig('results/q_learning/2/training_rwd.png')
+        fig3.savefig('results/q_learning/2/eval_rwd.png')
