@@ -49,7 +49,7 @@ class Trainer():
 
     def train_dqn(self, train_cfg, env, cb):
         '''使用标准DQN算法进行训练'''
-        dqn_cfg = NetworkConfig(hidden_dims=[128, 128])
+        dqn_cfg = NetworkConfig(hidden_dims=[128, 128], metrics=['mse'], lr=train_cfg.lr)
         dqn_model = DeepQNetworkModel(dqn_cfg)
         dqn_policy = DQNPolicy(model=dqn_model, device=self.device)
         dqn_agent = KytollyAgent(env, dqn_policy, train_cfg, cb)
