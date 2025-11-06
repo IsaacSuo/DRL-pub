@@ -16,7 +16,7 @@ from keras.optimizers import (
 from keras.losses import mean_squared_error, mean_absolute_error
 import numpy as np
 
-from config.dqn_cfg import DQNConfig
+from config.network import NetworkConfig as DQNConfig
 
 OPTIMIZER_DICT = {
     'Adam': Adam,
