@@ -100,4 +100,4 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
             gradients = tape.gradient(loss, self.model.online_model.trainable_variables)
             optimizer.apply_gradients(zip(gradients, self.model.online_model.trainable_variables))
 
-            return loss
+        return loss

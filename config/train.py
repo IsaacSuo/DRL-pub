@@ -13,6 +13,8 @@ class TrainingConfig:
     gamma: float = 0.99
     ba: int = 1
     target_update_freq: int = 0
+    warmup_size: int = 33550304
+    score_uplimit: int = 1000
 
     def load(self, path: str):
         """Update this instance from a YAML file."""
@@ -27,6 +29,8 @@ class TrainingConfig:
         if 'gamma' in params: self.gamma = float(params['gamma'])
         if 'ba' in params: self.ba = int(params['ba'])
         if 'target_update_freq' in params: self.target_update_freq = int(params['target_update_freq'])
+        if 'warmup_size' in params: self.warmup_size = int(params['warmup_size'])
+        if 'score_uplimit' in params: self.score_uplimit = int(params['score_uplimit'])
 
     @classmethod
     def from_yaml(cls, path: str):
@@ -43,6 +47,8 @@ class TrainingConfig:
             gamma=float(params.get('gamma', cls.gamma)),
             ba=int(params.get('ba', cls.ba)),
             target_update_freq=int(params.get('target_update_freq', cls.target_update_freq)),
+            warmup_size=int(params.get('warmup_size', cls.warmup_size)),
+            score_uplimit=int(params.get('score_uplimit', cls.score_uplimit)),
         )
     
     def table(self):

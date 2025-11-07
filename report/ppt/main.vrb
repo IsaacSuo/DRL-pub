@@ -1,0 +1,20 @@
+\frametitle{Project Directory Structure}
+\begin{lstlisting}[basicstyle=\ttfamily\small, frame=single]
+        ├── agent
+        │   ├── agent_with_ddqn.py
+        │   ├── agent_with_dqn.py
+        │   ├── agent_with_nqn.py
+        │   ├── agent_with_qn.py
+        │   └── core.py
+        ├── config
+        │   ├── hp_alternative.yml
+        │   ├── hp_baseline.yml
+        │   ├── network.py
+        │   └── train.py
+        ├── model
+        │   └── mlp_ddqn.py---mlp_qn.py
+        ├── policy
+        │   ├── base.py
+        │   └── ddqn.py---qn.py
+        └── pipeline.ipynb
+        \end{lstlisting}

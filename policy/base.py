@@ -19,6 +19,7 @@ class BasePolicy():
     def __init__(self, model: keras.Model, device='auto'):
         self.device = device
         self.model = model
+        
     def get_action(self, state, verbose=0):
         '''
         模型的预测模块，给定当前观察到的 agent 的状态 输出动作概率分布
@@ -32,13 +33,13 @@ class BasePolicy():
         """使用经验数据更新策略参数"""
         pass
     
-    def save(self, path: str):
+    def save(self, name: str):
         """保存策略参数"""
-        pass
+        self.model.save(name)
     
-    def load(self, path: str):
+    def load(self, name: str):
         """加载策略参数"""
-        pass
+        return self.model.load(name)
     
     def to(self, device):
         """移动模型到指定设备"""
