@@ -45,15 +45,17 @@ class DoubleDeepQNetworkPolicy(BasePolicy):
         loss_fn = self.model.loss_fn
         
         loss = self._fit_step_(states, actions, rewards, next_states, dones, tensor_gamma, optimizer, loss_fn)
-        # if cb:
-        #     with tf.summary.create_file_writer(cb.log_dir).as_default():
-        #         tf.summary.scalar('btach_loss', loss, step=train_counter)
+
+        # TensorBoard实时记录训练损失
+        if cb:
+            with tf.summary.create_file_writer(cb.log_dir).as_default():
+                tf.summary.scalar('Training/Batch_Loss', loss, step=train_counter)
 
         # Periodically update the target network
         if train_counter % target_update_freq == 0:
             self.model.sync()
             
-    @tf.function
+    @tf.function(jit_compile=True)  # 启用XLA编译加速
     def _fit_step_(self,
                    states: tf.Tensor,
                    actions: tf.Tensor,

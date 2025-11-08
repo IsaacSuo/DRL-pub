@@ -7,7 +7,7 @@ class DQNPolicy(BasePolicy):
     def __init__(self, model: DeepQNetworkModel, device):
         super().__init__(model, device)
 
-    @tf.function
+    @tf.function(jit_compile=True)  # 启用XLA编译加速
     def _fit_step(self,
                   states: tf.Tensor,
                   actions: tf.Tensor,
@@ -58,6 +58,11 @@ class DQNPolicy(BasePolicy):
         loss_fn = self.model.loss_fn
 
         loss = self._fit_step(states, actions, rewards, next_states, dones, tensor_gamma, optimizer, loss_fn)
+
+        # TensorBoard实时记录训练损失
+        if cb:
+            with tf.summary.create_file_writer(cb.log_dir).as_default():
+                tf.summary.scalar('Training/Batch_Loss', loss, step=train_counter)
 
         # periodically sync target network
         if train_counter % target_update_freq == 0:

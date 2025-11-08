@@ -88,9 +88,18 @@ class DeepQNetworkModel(keras.Model):
         print("\n=== Target Model ===")
         self.target_model.summary()
 
+    @tf.function
     def sync(self):
-        """将online模型的权重同步到target模型"""
-        self.target_model.set_weights(self.online_model.get_weights())
+        """将online模型的权重同步到target模型 - GPU优化版本,无CPU传输"""
+        for target_var, online_var in zip(
+            self.target_model.trainable_variables,
+            self.online_model.trainable_variables
+        ):
+            target_var.assign(online_var)  # 纯GPU内存操作
+
+    def sync_verbose(self):
+        """带打印信息的同步版本,仅在需要时调用"""
+        self.sync()
         print("✅ Target network synchronized with online network")
 
     def save(self, path):
