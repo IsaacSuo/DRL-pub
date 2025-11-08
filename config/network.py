@@ -1,11 +1,12 @@
 from keras.losses import Loss
 from dataclasses import dataclass, fields
+from typing import List  # Python 3.8兼容
 import matplotlib.pyplot as plt
 
 @dataclass
 class NetworkConfig:
-    hidden_dims: list[int]
-    metrics: list[str]
+    hidden_dims: List[int]  # 使用typing.List代替list[int]
+    metrics: List[str]
     input_dim: int = 4
     output_dim: int = 2
     use_bias: bool = True
