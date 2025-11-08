@@ -27,6 +27,16 @@ class Trainer():
         self.action_size = self.env.action_space.n            # Number of possible actions
         self.cb = keras.callbacks.TensorBoard(log_dir = log_dir, histogram_freq=1)
         self.device = device
+
+        # Configure GPU memory growth to prevent OOM errors
+        gpus = tf.config.list_physical_devices('GPU')
+        if gpus:
+            try:
+                for gpu in gpus:
+                    tf.config.experimental.set_memory_growth(gpu, True)
+                print(f"✅ Configured {len(gpus)} GPU(s) with memory growth enabled")
+            except RuntimeError as e:
+                print(f"⚠️  GPU configuration warning: {e}")
     
     def train(self):
         '''默认中每个 baseline approach 都应该使用相同的 TrainingConfig'''
@@ -34,7 +44,7 @@ class Trainer():
         online_ddqn_cfg = NetworkConfig(hidden_dims=[128, 128], metrics=['mse'])
         ddqn_model = DoubleDeepQNetworkModel(online_ddqn_cfg)
         xqy_policy = DoubleDeepQNetworkPolicy(model=ddqn_model,device=self.device)
-        xqy_agent = KytollyAgent(env, xqy_policy, train_cfg, cb)
+        xqy_agent = KytollyAgent(env, xqy_policy, train_cfg, cb, device=self.device)
         xqy_agent.learn()
         
         fig0, ax0 = online_ddqn_cfg.table()
@@ -52,7 +62,7 @@ class Trainer():
         dqn_cfg = NetworkConfig(hidden_dims=[128, 128], metrics=['mse'], lr=train_cfg.lr)
         dqn_model = DeepQNetworkModel(dqn_cfg)
         dqn_policy = DQNPolicy(model=dqn_model, device=self.device)
-        dqn_agent = KytollyAgent(env, dqn_policy, train_cfg, cb)
+        dqn_agent = KytollyAgent(env, dqn_policy, train_cfg, cb, device=self.device)
         dqn_agent.learn()
 
         fig0, ax0 = dqn_cfg.table()

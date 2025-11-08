@@ -13,14 +13,15 @@ from keras.callbacks import TensorBoard
 from agent.replay_buffer import OptimizedReplayBuffer
 
 class KytollyAgent(CoreAgent):
-    def __init__(self, env: Env, policy: BasePolicy, cfg: TrainingConfig, cb: TensorBoard):
+    def __init__(self, env: Env, policy: BasePolicy, cfg: TrainingConfig, cb: TensorBoard, device: str = 'auto'):
         super().__init__(env, policy, cfg, cb)
         self.warmup_size = cfg.warmup_size
-        
-        # CHANGED: Initialize the high-performance buffer
+
+        # GPU-accelerated replay buffer
         self.replay_buffer = OptimizedReplayBuffer(
             max_size=50000,  # A reasonably large buffer size
-            state_dim=self.env.observation_space.shape[0]
+            state_dim=self.env.observation_space.shape[0],
+            device=device  # 传递设备参数
         )
         
     def remember(self, state, action, reward, next_state, done):
@@ -33,8 +34,7 @@ class KytollyAgent(CoreAgent):
     
     def init_buffer(self, min_replay_size=10000):
         '''Fills the replay buffer with initial random experiences.'''
-        # CHANGED: Updated print statement for clarity
-        print('Initializing optimized replay buffer, starting warmup...')
+        print('Initializing GPU-accelerated replay buffer, starting warmup...')
         state_size = self.env.observation_space.shape[0]
         state, _ = self.env.reset()
         state = np.reshape(state, [1, state_size])
@@ -52,8 +52,7 @@ class KytollyAgent(CoreAgent):
             else:
                 state = next_state
         
-        # CHANGED: Updated print statement
-        print(f"Warmup complete. Optimized replay buffer size: {len(self.replay_buffer)}")
+        print(f"Warmup complete. GPU replay buffer size: {len(self.replay_buffer)}")
     
     def sample_buffer(self, batch_size):
         '''Samples a mini-batch from the buffer.'''
