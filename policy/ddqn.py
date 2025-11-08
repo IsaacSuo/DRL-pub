@@ -10,7 +10,7 @@ import random
 import gymnasium as gym
 from gymnasium import Env
 from keras.callbacks import TensorBoard
-from keras.src.optimizers import Optimizer
+from keras.optimizers import Optimizer  # Keras 2.x兼容
 from keras.losses import Loss
 from model.ddqn_mlp import DoubleDeepQNetworkModel
 
