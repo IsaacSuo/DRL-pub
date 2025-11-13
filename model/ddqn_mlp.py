@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import tensorflow as tf
 import keras
 from keras import Sequential
@@ -7,9 +8,7 @@ from keras.optimizers import (
     Adadelta, 
     Adam, 
     Adamax, 
-    AdamW, 
     Ftrl,
-    Lion,
     Nadam,
     RMSprop,
     SGD,
@@ -18,7 +17,6 @@ from keras.losses import (
     BinaryCrossentropy,
     BinaryFocalCrossentropy,
     CategoricalCrossentropy,
-    CategoricalFocalCrossentropy,
     CategoricalHinge,
     CosineSimilarity,
     Hinge,
@@ -35,9 +33,7 @@ OPTIMIZER_DICT = {
     'Adadelta': Adadelta, 
     'Adam': Adam, 
     'Adamax': Adamax, 
-    'AdamW': AdamW, 
     'Ftrl': Ftrl,
-    'Lion': Lion,
     'Nadam': Nadam,
     'RMSprop': RMSprop,
     'SGD': SGD,
@@ -49,7 +45,6 @@ LOSSFUNCTION_DICT = {
     'bc': BinaryCrossentropy,
     'bfc':BinaryFocalCrossentropy,
     'cc':CategoricalCrossentropy,
-    'cfc':CategoricalFocalCrossentropy,
     'ch':CategoricalHinge,
     'cs':CosineSimilarity,
     'h':Hinge,

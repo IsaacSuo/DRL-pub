@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import tensorflow as tf
 import keras
 from keras import Sequential
@@ -6,9 +7,7 @@ from keras.optimizers import (
     Adadelta,
     Adam,
     Adamax,
-    AdamW,
     Ftrl,
-    Lion,
     Nadam,
     RMSprop,
     SGD,
@@ -22,9 +21,7 @@ OPTIMIZER_DICT = {
     'Adam': Adam,
     'Adadelta': Adadelta,
     'Adamax': Adamax,
-    'AdamW': AdamW,
     'Ftrl': Ftrl,
-    'Lion': Lion,
     'Nadam': Nadam,
     'RMSprop': RMSprop,
     'SGD': SGD,
